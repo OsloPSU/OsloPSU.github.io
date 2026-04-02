@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Suivi Basket</title>
+
+<meta name="theme-color" content="#f3f5fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Suivi Basket">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Suivi Basket EPS Pro — application claire, minimaliste et Apple-like pour suivre la progression des équipes.">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
+<style>
+:root{
+  --bg: #f3f5fb;
+  --bg-2: #eef2f9;
+  --card: rgba(255,255,255,0.72);
+  --card-solid: rgba(255,255,255,0.88);
+  --card-strong: #ffffff;
+  --text: #0f172a;
+  --muted: #667085;
+  --border: rgba(15,23,42,0.07);
+  --border-strong: rgba(15,23,42,0.11);
+  --shadow: 0 24px 80px rgba(15,23,42,0.10);
+  --shadow-soft: 0 14px 40px rgba(15,23,42,0.07);
+  --shadow-hover: 0 20px 55px rgba(15,23,42,0.12);
+
+  --tzf: #ffd9e1;
+  --tzf-strong: #ff6485;
+
+  --tir8: #dcfce3;
+  --tir8-strong: #34c759;
+
+  --treu: #dce9ff;
+  --treu-strong: #3b82f6;
+
+  --primary: #111827;
+  --secondary: #f1f5f9;
+  --accent: #0a84ff;
+  --danger: #ff3b30;
+
+  --progress-low: #ff8f8f;
+  --progress-mid: #ffb74d;
+  --progress-good: #34c759;
+  --progress-top: #0a84ff;
+
+  --radius-xl: 36px;
+  --radius-lg: 28px;
+  --radius-md: 22px;
+  --radius-sm: 18px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body{
+  margin:0;
+  padding:0;
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(10,132,255,0.11), transparent 28%),
+    radial-gradient(circle at top right, rgba(52,199,89,0.08), transparent 24%),
+    radial-gradient(circle at bottom center, rgba(255,100,133,0.08), transparent 26%),
+    linear-gradient(180deg, #f7f9fe 0%, #eef3fb 100%);
+  color:var(--text);
+  min-height:100vh;
+}
+
+body{
+  padding:24px;
+}
+
+.page{
+  display:none;
+  max-width:1320px;
+  margin:0 auto;
+  animation:fadeUp .45s var(--ease);
+}
+
+.active{
+  display:block;
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.appCard{
+  background:var(--card);
+  backdrop-filter: blur(26px) saturate(1.25);
+  -webkit-backdrop-filter: blur(26px) saturate(1.25);
+  border:1px solid rgba(255,255,255,0.58);
+  box-shadow:var(--shadow);
+  border-radius:42px;
+  padding:32px;
+  position:relative;
+  overflow:hidden;
+}
+
+.appCard::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.45), transparent 24%),
+    radial-gradient(circle at top right, rgba(255,255,255,0.25), transparent 20%);
+  pointer-events:none;
+}
+
+.hero{
+  margin-bottom:24px;
+  position:relative;
+  z-index:1;
+}
+
+.hero h1{
+  font-size:clamp(34px, 5vw, 56px);
+  margin:0 0 10px 0;
+  font-weight:900;
+  letter-spacing:-0.045em;
+  line-height:0.98;
+}
+
+.heroSub{
+  font-size:17px;
+  color:var(--muted);
+  max-width:620px;
+  line-height:1.6;
+}
+
+.topBar{
+  display:grid;
+  grid-template-columns: 1fr 220px;
+  gap:18px;
+  margin:24px 0 20px 0;
+  position:relative;
+  z-index:1;
+}
+
+.inputCard{
+  background:var(--card-solid);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:18px 20px;
+  box-shadow:var(--shadow-soft);
+  text-align:left;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s ease;
+}
+
+.inputCard:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-hover);
+  border-color:rgba(15,23,42,0.10);
+}
+
+.inputCard label{
+  display:block;
+  font-size:13px;
+  font-weight:900;
+  color:var(--muted);
+  margin-bottom:10px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+}
+
+input, select{
+  width:100%;
+  font-size:22px;
+  padding:16px 18px;
+  border-radius:20px;
+  border:1px solid rgba(15,23,42,0.07);
+  background:linear-gradient(180deg, #fbfcff 0%, #f4f7fb 100%);
+  color:var(--text);
+  outline:none;
+  transition:0.25s var(--ease);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+input:focus, select:focus{
+  border-color: rgba(10,132,255,0.35);
+  box-shadow: 0 0 0 6px rgba(10,132,255,0.10);
+  background:white;
+}
+
+.gridWrap{
+  background:var(--card-solid);
+  border:1px solid var(--border);
+  border-radius:32px;
+  padding:24px;
+  box-shadow:var(--shadow-soft);
+  margin:10px 0 28px 0;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+  position:relative;
+  z-index:1;
+}
+
+.gridWrap:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-hover);
+}
+
+.gridTitle{
+  font-size:26px;
+  font-weight:900;
+  margin-bottom:6px;
+  text-align:left;
+  letter-spacing:-0.03em;
+}
+
+.gridSubtitle{
+  text-align:left;
+  color:var(--muted);
+  margin-bottom:18px;
+  font-size:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(15, minmax(24px, 1fr));
+  gap:10px;
+  justify-content:center;
+}
+
+.squareContainer{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.square{
+  width:100%;
+  aspect-ratio:1/1;
+  min-width:28px;
+  max-width:42px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:
+    transform .22s var(--ease),
+    box-shadow .22s var(--ease),
+    outline .22s ease,
+    filter .22s ease;
+  border:1px solid rgba(15,23,42,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.square:hover{
+  transform:translateY(-3px) scale(1.03);
+  filter:brightness(1.02);
+}
+
+.s0{ background:linear-gradient(180deg, #f5f7fb, #e8edf4); }
+.s1{ background:linear-gradient(180deg, #b0bac7, #8f9caf); }
+.s2{ background:linear-gradient(180deg, #73839b, #5c6d86); }
+.s3{ background:linear-gradient(180deg, #273446, #182230); }
+
+.squareLabel{
+  font-size:12px;
+  margin-top:6px;
+  color:#667085;
+  font-weight:800;
+}
+
+.current{
+  outline:3px solid rgba(10,132,255,0.85);
+  outline-offset:3px;
+  box-shadow:
+    0 0 0 10px rgba(10,132,255,0.07),
+    0 10px 22px rgba(10,132,255,0.12);
+}
+
+.shootContainer{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:18px;
+  margin-top:10px;
+  position:relative;
+  z-index:1;
+}
+
+.shootBlock{
+  background:var(--card-solid);
+  border:1px solid var(--border);
+  border-radius:32px;
+  padding:24px;
+  box-shadow:var(--shadow-soft);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s ease;
+}
+
+.shootBlock:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-hover);
+  border-color:rgba(15,23,42,0.10);
+}
+
+.shootLabel{
+  font-size:16px;
+  font-weight:900;
+  color:var(--muted);
+  margin-bottom:14px;
+  letter-spacing:0.02em;
+}
+
+.shoot{
+  width:100%;
+  min-height:102px;
+  border:none;
+  border-radius:28px;
+  font-size:24px;
+  font-weight:900;
+  cursor:pointer;
+  transition:transform .22s var(--ease), box-shadow .22s var(--ease), filter .22s ease;
+  color:#111827;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.65),
+    0 14px 26px rgba(15,23,42,0.06);
+}
+
+.shoot:hover{
+  transform:translateY(-2px) scale(1.012);
+  filter:brightness(1.015);
+}
+
+.shoot:active{
+  transform:scale(0.985);
+}
+
+.tzf{
+  background:linear-gradient(135deg, #fff0f4, var(--tzf));
+}
+
+.tir8{
+  background:linear-gradient(135deg, #f0fff4, var(--tir8));
+}
+
+.treuzf{
+  background:linear-gradient(135deg, #eff5ff, var(--treu));
+}
+
+.percent{
+  font-size:40px;
+  margin-top:16px;
+  font-weight:950;
+  letter-spacing:-0.04em;
+}
+
+.controls{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-top:32px;
+  position:relative;
+  z-index:1;
+}
+
+.controls button,
+.bigReturn,
+.deleteBtn,
+.teamList button{
+  border:none;
+  cursor:pointer;
+  transition:transform .22s var(--ease), box-shadow .22s var(--ease), opacity .18s ease, filter .18s ease;
+}
+
+.controls button:hover,
+.bigReturn:hover,
+.deleteBtn:hover,
+.teamList button:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.01);
+}
+
+.controls button:active,
+.bigReturn:active,
+.deleteBtn:active,
+.teamList button:active{
+  transform:scale(0.985);
+}
+
+.controls button{
+  min-width:190px;
+  min-height:58px;
+  font-size:18px;
+  font-weight:900;
+  border-radius:20px;
+  padding:0 22px;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+}
+
+.controls button::before,
+.bigReturn::before,
+.deleteBtn::before,
+.teamList button::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(255,255,255,0.26), transparent 55%);
+  pointer-events:none;
+}
+
+.save{
+  background:linear-gradient(135deg, #0f172a, #1f2937);
+  color:white;
+}
+
+.result{
+  background:linear-gradient(135deg, #f8fafc, #e9eef6);
+  color:#111827;
+}
+
+.reset{
+  background:linear-gradient(135deg, #fff8db, #ffe7a3);
+  color:#111827;
+}
+
+.tableCard,
+.summaryCard,
+.chartCard{
+  background:var(--card-solid);
+  border:1px solid var(--border);
+  border-radius:34px;
+  padding:24px;
+  box-shadow:var(--shadow-soft);
+  overflow:hidden;
+  margin-top:22px;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s ease;
+}
+
+.tableCard:hover,
+.summaryCard:hover,
+.chartCard:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-hover);
+  border-color:rgba(15,23,42,0.10);
+}
+
+.tableWrapper{
+  overflow:auto;
+  border-radius:24px;
+  border:1px solid rgba(15,23,42,0.05);
+  background:linear-gradient(180deg, rgba(255,255,255,0.75), rgba(248,250,252,0.95));
+}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:18px;
+  background:transparent;
+}
+
+thead th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:rgba(248,250,252,0.95);
+  backdrop-filter: blur(10px);
+  font-weight:900;
+  color:#111827;
+}
+
+th, td{
+  border-bottom:1px solid rgba(15,23,42,0.05);
+  padding:18px 18px;
+  text-align:center;
+}
+
+tbody tr{
+  transition:background .18s ease, transform .18s ease;
+}
+
+tbody tr:hover{
+  background:#fafcff;
+}
+
+td:first-child, th:first-child{
+  text-align:left;
+  min-width:180px;
+}
+
+.colTZF{ background:rgba(255,122,144,0.22); }
+.col8{ background:rgba(52,199,89,0.20); }
+.colTREU{ background:rgba(59,130,246,0.20); }
+
+.best{
+  position:relative;
+  font-weight:950;
+  box-shadow: inset 0 0 0 3px rgba(17,24,39,0.18);
+  border-radius:16px;
+}
+
+.feedbackRow td{
+  padding-top:14px;
+  padding-bottom:22px;
+  background:#fcfdff;
+}
+
+.feedbackText{
+  text-align:left;
+  font-size:16px;
+  line-height:1.85;
+  color:#1f2937;
+  border:1px solid rgba(15,23,42,0.05);
+  border-radius:24px;
+  padding:24px 26px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.feedbackText strong{
+  font-weight:900;
+}
+
+.feedback-tzf{
+  background:linear-gradient(135deg, rgba(255,122,144,0.18), rgba(255,215,222,0.74));
+}
+
+.feedback-tir8{
+  background:linear-gradient(135deg, rgba(52,199,89,0.18), rgba(217,248,223,0.78));
+}
+
+.feedback-treu{
+  background:linear-gradient(135deg, rgba(59,130,246,0.16), rgba(219,232,255,0.82));
+}
+
+.feedbackSub{
+  margin-top:14px;
+  font-size:15px;
+  color:#243042;
+  opacity:0.95;
+}
+
+.teamList{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+  margin-top:18px;
+}
+
+.teamList button{
+  font-size:22px;
+  padding:22px 18px;
+  border-radius:28px;
+  color:white;
+  font-weight:900;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+}
+
+.team0{background:linear-gradient(135deg, #5eead4, #14b8a6);}
+.team1{background:linear-gradient(135deg, #fdba74, #f97316);}
+.team2{background:linear-gradient(135deg, #a78bfa, #7c3aed);}
+.team3{background:linear-gradient(135deg, #6ee7b7, #10b981);}
+.team4{background:linear-gradient(135deg, #fde68a, #f59e0b);}
+.team5{background:linear-gradient(135deg, #93c5fd, #2563eb);}
+.team6{background:linear-gradient(135deg, #f9a8d4, #ec4899);}
+.team7{background:linear-gradient(135deg, #86efac, #22c55e);}
+.team8{background:linear-gradient(135deg, #fdba74, #fb923c);}
+.team9{background:linear-gradient(135deg, #a5b4fc, #6366f1);}
+.team10{background:linear-gradient(135deg, #fda4af, #e11d48);}
+.team11{background:linear-gradient(135deg, #99f6e4, #14b8a6);}
+
+.bigReturn{
+  font-size:18px;
+  padding:16px 28px;
+  margin-top:24px;
+  border-radius:20px;
+  background:linear-gradient(135deg, #f8fafc, #e8eef6);
+  color:#111827;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+}
+
+.deleteBtn{
+  margin-top:18px;
+  padding:12px 22px;
+  border-radius:999px;
+  background:rgba(255,59,48,0.12);
+  color:var(--danger);
+  font-size:15px;
+  font-weight:900;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+}
+
+.pageHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
+}
+
+.pageHeader h2{
+  margin:0;
+  font-size:42px;
+  font-weight:950;
+  letter-spacing:-0.045em;
+}
+
+.emptyState{
+  margin-top:20px;
+  padding:30px;
+  background:rgba(255,255,255,0.72);
+  border:1px dashed rgba(15,23,42,0.10);
+  border-radius:26px;
+  color:var(--muted);
+  font-size:18px;
+}
+
+.summaryGrid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:16px;
+}
+
+.summaryItem{
+  border-radius:28px;
+  padding:20px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,250,253,0.98));
+  border:1px solid rgba(15,23,42,0.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.75),
+    0 10px 26px rgba(15,23,42,0.04);
+  transition:transform .22s var(--ease), box-shadow .22s var(--ease);
+}
+
+.summaryItem:hover{
+  transform:translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.75),
+    0 16px 34px rgba(15,23,42,0.07);
+}
+
+.summaryLabel{
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+
+.summaryValue{
+  font-size:24px;
+  font-weight:950;
+  line-height:1.3;
+  letter-spacing:-0.03em;
+}
+
+.summaryHint{
+  margin-top:10px;
+  font-size:14px;
+  color:#4b5563;
+  line-height:1.6;
+}
+
+.progressBarWrap{
+  margin-top:14px;
+  width:100%;
+  height:14px;
+  background:linear-gradient(180deg, #edf2f7, #e7edf5);
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+}
+
+.progressBar{
+  height:100%;
+  border-radius:999px;
+  transition:width .6s var(--ease);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 18px rgba(10,132,255,0.12);
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:900;
+  margin-top:12px;
+  width:fit-content;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.badge.ready{
+  background:rgba(10,132,255,0.12);
+  color:#0a84ff;
+}
+
+.badge.good{
+  background:rgba(52,199,89,0.12);
+  color:#1f9b45;
+}
+
+.badge.mid{
+  background:rgba(255,159,10,0.12);
+  color:#c97d00;
+}
+
+.badge.low{
+  background:rgba(255,59,48,0.12);
+  color:#d93025;
+}
+
+.chartTitle{
+  font-size:26px;
+  font-weight:950;
+  margin-bottom:6px;
+  letter-spacing:-0.03em;
+}
+
+.chartSubtitle{
+  color:var(--muted);
+  font-size:15px;
+  margin-bottom:18px;
+}
+
+.chartCanvasWrap{
+  background:linear-gradient(180deg, #fcfdff, #f5f8fd);
+  border-radius:28px;
+  border:1px solid rgba(15,23,42,0.05);
+  padding:14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+#progressChart{
+  width:100%;
+  height:360px;
+  display:block;
+}
+
+@media (max-width: 1100px){
+  .summaryGrid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 980px){
+  .topBar{
+    grid-template-columns:1fr;
+  }
+
+  .shootContainer{
+    grid-template-columns:1fr;
+  }
+
+  .grid{
+    grid-template-columns:repeat(5, minmax(30px, 1fr));
+  }
+
+  th, td{
+    padding:14px 12px;
+    font-size:16px;
+  }
+}
+
+@media (max-width: 700px){
+  .summaryGrid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 640px){
+  body{
+    padding:14px;
+  }
+
+  .appCard{
+    padding:18px;
+    border-radius:30px;
+  }
+
+  .hero h1{
+    font-size:34px;
+  }
+
+  .pageHeader h2{
+    font-size:30px;
+  }
+
+  .percent{
+    font-size:32px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="page1" class="page active">
+  <div class="appCard">
+    <div class="hero">
+      <h1>Suivi Basket</h1>
+      <div class="heroSub">Un suivi plus clair, plus fluide et plus lisible pour visualiser rapidement la progression de chaque équipe.</div>
+    </div>
+
+    <div class="topBar">
+      <div class="inputCard">
+        <label for="teamName">Nom de l’équipe</label>
+        <input id="teamName" placeholder="Ex : Les Rockets">
+      </div>
+
+      <div class="inputCard">
+        <label for="lessonNumber">Leçon</label>
+        <select id="lessonNumber">
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option>
+          <option>9</option><option>10</option><option>11</option><option>12</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="gridWrap">
+      <div class="gridTitle">Gestion des 15 essais</div>
+      <div class="gridSubtitle">Clique sur un carré pour te placer sur un essai précis.</div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="shootContainer">
+      <div class="shootBlock">
+        <div class="shootLabel">Situation 1</div>
+        <button class="shoot tzf" onclick="tir(0)">TZF</button>
+        <div id="p0" class="percent">0%</div>
+      </div>
+
+      <div class="shootBlock">
+        <div class="shootLabel">Situation 2</div>
+        <button class="shoot tir8" onclick="tir(1)">Tir -8s</button>
+        <div id="p1" class="percent">0%</div>
+      </div>
+
+      <div class="shootBlock">
+        <div class="shootLabel">Situation 3</div>
+        <button class="shoot treuzf" onclick="tir(2)">TReuZF</button>
+        <div id="p2" class="percent">0%</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="save" onclick="save()">Enregistrer</button>
+      <button class="result" onclick="showTeams()">Voir résultats</button>
+      <button class="reset" onclick="reset()">Réinitialiser l’essai</button>
+    </div>
+  </div>
+</div>
+
+<div id="pageTeams" class="page">
+  <div class="appCard">
+    <div class="pageHeader">
+      <div>
+        <h2>Équipes</h2>
+      </div>
+    </div>
+
+    <div id="teams" class="teamList"></div>
+
+    <button class="bigReturn" onclick="showPage('page1')">Retour</button>
+    <br>
+    <button class="deleteBtn" onclick="deleteAll()">Supprimer toutes les équipes</button>
+  </div>
+</div>
+
+<div id="pageResults" class="page">
+  <div class="appCard">
+    <div class="pageHeader">
+      <div>
+        <h2 id="teamTitle"></h2>
+      </div>
+    </div>
+
+    <div class="tableCard">
+      <div class="tableWrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Leçon / Essai</th>
+              <th class="colTZF">TZF</th>
+              <th class="col8">Tir -8s</th>
+              <th class="colTREU">TReuZF</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="summaryCard">
+      <div class="summaryGrid" id="summaryGrid"></div>
+    </div>
+
+    <div class="chartCard">
+      <div class="chartTitle">Courbe de progression</div>
+      <div class="chartSubtitle">Évolution par leçon et par statistique.</div>
+      <div class="chartCanvasWrap">
+        <canvas id="progressChart" width="1100" height="360"></canvas>
+      </div>
+    </div>
+
+    <button class="bigReturn" onclick="showTeams()">Retour</button>
+  </div>
+</div>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
+const MAX = 15;
+
+let essais = [0, 0, 0];
+let current = 0;
+let attempts = new Array(MAX).fill(0);
+let clicked = [false, false, false];
+
+const grid = document.getElementById("grid");
+
+for(let i = 0; i < MAX; i++){
+  let container = document.createElement("div");
+  container.className = "squareContainer";
+
+  let s = document.createElement("div");
+  s.className = "square s0";
+
+  s.onclick = () => {
+    if(i >= current){
+      current = i;
+      clicked = [false, false, false];
+    }
+    updateSquares();
+  };
+
+  let label = document.createElement("div");
+  label.className = "squareLabel";
+  label.textContent = i + 1;
+
+  container.appendChild(s);
+  container.appendChild(label);
+  grid.appendChild(container);
+}
+
+function animateValue(el, newValue){
+  const oldValue = parseInt(el.innerText) || 0;
+  const duration = 260;
+  const start = performance.now();
+
+  function tick(now){
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(oldValue + (newValue - oldValue) * eased);
+    el.innerText = value + "%";
+    if(progress < 1) requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function tir(i){
+  if(current >= MAX) return;
+  if(essais[i] >= MAX) return;
+
+  if(clicked[i]){
+    nextAttempt();
+    if(current >= MAX) return;
+    clicked = [false, false, false];
+  }
+
+  clicked[i] = true;
+  essais[i]++;
+  attempts[current]++;
+  updatePercent();
+  updateSquares();
+}
+
+function nextAttempt(){
+  if(current < MAX - 1){
+    current++;
+    clicked = [false, false, false];
+  }
+}
+
+function updateSquares(){
+  document.querySelectorAll(".square").forEach((s, i) => {
+    s.className = "square s" + attempts[i];
+    if(i === current) s.classList.add("current");
+  });
+}
+
+function updatePercent(){
+  for(let i = 0; i < 3; i++){
+    const value = Math.round((essais[i] / MAX) * 100);
+    animateValue(document.getElementById("p" + i), value);
+  }
+}
+
+function reset(){
+  essais = [0, 0, 0];
+  attempts = new Array(MAX).fill(0);
+  current = 0;
+  clicked = [false, false, false];
+  updatePercent();
+  updateSquares();
+}
+
+function showPage(p){
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
+  document.getElementById(p).classList.add("active");
+}
+
+function getData(){
+  return JSON.parse(localStorage.getItem("basket")) || {};
+}
+
+function save(){
+  let team = document.getElementById("teamName").value.trim();
+  if(!team){
+    alert("Nom équipe");
+    return;
+  }
+
+  let lesson = parseInt(document.getElementById("lessonNumber").value);
+  let data = getData();
+
+  if(!data[team]){
+    let color = Object.keys(data).length % 12;
+    data[team] = { color: color, results: [] };
+  }
+
+  let score = [
+    Math.round((essais[0] / MAX) * 100),
+    Math.round((essais[1] / MAX) * 100),
+    Math.round((essais[2] / MAX) * 100)
+  ];
+
+  let lessonResults = data[team].results.filter(r => r.lesson === lesson);
+  let essaiNum = lessonResults.length + 1;
+
+  data[team].results.push({
+    lesson: lesson,
+    essai: essaiNum,
+    scores: score
+  });
+
+  localStorage.setItem("basket", JSON.stringify(data));
+  alert("Enregistré");
+  reset();
+}
+
+function showTeams(){
+  showPage("pageTeams");
+  let data = getData();
+  let div = document.getElementById("teams");
+  div.innerHTML = "";
+
+  const teamNames = Object.keys(data);
+
+  if(teamNames.length === 0){
+    div.innerHTML = `<div class="emptyState">Aucune équipe enregistrée pour le moment.</div>`;
+    return;
+  }
+
+  teamNames.forEach(t => {
+    let b = document.createElement("button");
+    b.className = "team" + data[t].color;
+    b.innerText = t;
+    b.onclick = () => openTeam(t);
+    div.appendChild(b);
+  });
+}
+
+function getStatMeta(index){
+  if(index === 0){
+    return { key: "TZF", situation: "L’électron libre", feedbackClass: "feedback-tzf" };
+  }
+  if(index === 1){
+    return { key: "Tir -8s", situation: "Flash McQueen", feedbackClass: "feedback-tir8" };
+  }
+  return { key: "TReuZF", situation: "Les snipers", feedbackClass: "feedback-treu" };
+}
+
+function pick(arr, seed){
+  return arr[seed % arr.length];
+}
+
+function getMainFeedback(scores, rowIndex){
+  const min = Math.min(...scores);
+  const weakestIndexes = scores.map((score, index) => ({ score, index }))
+    .filter(item => item.score === min)
+    .map(item => item.index);
+
+  const weakest = weakestIndexes[0];
+  const meta = getStatMeta(weakest);
+  const tieMode = weakestIndexes.length >= 2;
+  const seed = rowIndex + scores.reduce((a,b)=>a+b,0);
+
+  const baseTexts = {
+    0: [
+      `Aujourd’hui, sur <strong>TZF</strong>, on sent déjà des intentions très utiles. Tout n’est pas encore stabilisé, mais il y a déjà une vraie base sur laquelle on va pouvoir construire.`,
+      `Sur <strong>TZF</strong>, il y a déjà quelque chose d’intéressant qui se met en place. Ce n’est pas encore totalement régulier, mais le groupe commence à mieux comprendre comment exister dans le jeu.`,
+      `Même si <strong>TZF</strong> reste encore le principal levier du moment, il y a déjà des signes positifs dans l’engagement et la volonté d’être davantage disponible.`
+    ],
+    1: [
+      `Sur <strong>Tir -8s</strong>, on voit déjà une vraie envie d’accélérer et de jouer plus vite. Le cadre n’est pas encore totalement maîtrisé, mais la dynamique est bien présente.`,
+      `Le travail sur <strong>Tir -8s</strong> reste encore à renforcer, mais il y a déjà des intentions très intéressantes dans la vitesse d’exécution.`,
+      `Aujourd’hui, <strong>Tir -8s</strong> ressort comme le levier principal, mais il y a déjà des choses encourageantes dans le rythme et la volonté d’aller vite.`
+    ],
+    2: [
+      `Sur <strong>TReuZF</strong>, les repères sont encore en train de se construire, mais on voit déjà une vraie volonté de s’engager dans la finition.`,
+      `Même si <strong>TReuZF</strong> demande encore du travail, il y a déjà des bases encourageantes dans la recherche de précision et de réussite.`,
+      `Aujourd’hui, <strong>TReuZF</strong> reste encore à consolider, mais on sent déjà des intentions positives sur cette dimension.`
+    ]
+  };
+
+  const tieTexts = [
+    `Comme un autre indicateur ressort exactement au même niveau, on va d’abord se concentrer ici pour vraiment consolider ce levier avant d’aller chercher l’autre la prochaine fois.`,
+    `Deux axes sont actuellement au même niveau ; on va commencer par celui-ci pour créer plus de repères et de confiance avant d’élargir le travail.`,
+    `Ce domaine partage la même priorité qu’un autre aujourd’hui, mais on va d’abord lui donner plus de stabilité pour mieux faire progresser l’ensemble ensuite.`
+  ];
+
+  const orientationTexts = {
+    0: [
+      `La situation <strong>« ${meta.situation} »</strong> sera maintenant très intéressante pour aider les élèves à mieux se rendre disponibles, mieux se déplacer et mieux lire les espaces.`,
+      `On va maintenant pouvoir s’appuyer sur <strong>« ${meta.situation} »</strong> pour faire grandir la mobilité, la disponibilité et la lecture du jeu.`,
+      `La prochaine étape pourra passer par <strong>« ${meta.situation} »</strong> afin de renforcer la présence utile dans le jeu et la qualité des déplacements.`
+    ],
+    1: [
+      `La situation <strong>« ${meta.situation} »</strong> permettra maintenant de continuer à gagner en vitesse de décision, en rythme et en efficacité.`,
+      `On va maintenant s’appuyer sur <strong>« ${meta.situation} »</strong> pour aider les élèves à mieux enchaîner, décider plus vite et attaquer plus efficacement.`,
+      `La prochaine étape passera bien par <strong>« ${meta.situation} »</strong>, pour renforcer la rapidité d’action et la capacité à déclencher plus vite.`
+    ],
+    2: [
+      `La situation <strong>« ${meta.situation} »</strong> va maintenant permettre de consolider la précision, la stabilité du geste et la confiance dans la finition.`,
+      `On va maintenant pouvoir utiliser <strong>« ${meta.situation} »</strong> pour renforcer la régularité et la qualité de réussite dans les tirs plus exigeants.`,
+      `La prochaine étape passera par <strong>« ${meta.situation} »</strong> afin d’ancrer davantage la précision, la confiance et la constance dans la réussite.`
+    ]
+  };
+
+  let text = `${pick(baseTexts[weakest], seed)} `;
+  if(tieMode) text += `${pick(tieTexts, seed)} `;
+  text += pick(orientationTexts[weakest], seed);
+
+  return {
+    text,
+    className: meta.feedbackClass,
+    weakestIndex: weakest
+  };
+}
+
+function getGeneralLevelText(avg){
+  if(avg < 35){
+    return `Sur les autres repères, tout n’est pas encore installé, mais il y a déjà de bonnes intentions et un engagement intéressant sur lequel on va pouvoir s’appuyer.`;
+  } else if(avg < 50){
+    return `Sur le reste, on sent que la progression est en route : les élèves commencent à mieux comprendre, mieux se placer et mieux répondre aux attentes.`;
+  } else if(avg < 65){
+    return `Les autres statistiques évoluent dans le bon sens. Il y a déjà une progression visible et des repères qui commencent à devenir plus réguliers.`;
+  } else if(avg < 75){
+    return `Les autres indicateurs sont globalement bien engagés. Le travail commence à être vraiment encourageant et les progrès sont bien présents.`;
+  } else {
+    return `Les autres statistiques sont déjà à un niveau très rassurant. Si cette dynamique se confirme, l’équipe sera vraiment très bien préparée pour l’évaluation sur ces aspects.`;
+  }
+}
+
+function getOtherStatsFeedback(scores, weakestIndex){
+  const others = scores.filter((_, i) => i !== weakestIndex);
+  const avg = Math.round((others[0] + others[1]) / 2);
+  return getGeneralLevelText(avg);
+}
+
+function getPreparationLevel(avg){
+  if(avg < 35) return "En construction";
+  if(avg < 50) return "En progression";
+  if(avg < 65) return "Encourageant";
+  if(avg < 75) return "Très encourageant";
+  return "Équipe prête pour l’évaluation";
+}
+
+function getBadge(avg){
+  if(avg >= 75){
+    return `<div class="badge ready">● Équipe prête pour l’évaluation</div>`;
+  } else if(avg >= 60){
+    return `<div class="badge good">● Équipe en bonne voie</div>`;
+  } else if(avg >= 45){
+    return `<div class="badge mid">● Progression bien engagée</div>`;
+  } else {
+    return `<div class="badge low">● Base encore en construction</div>`;
+  }
+}
+
+function getProgressColor(avg){
+  if(avg >= 75) return "linear-gradient(90deg, #5db7ff, #0a84ff)";
+  if(avg >= 60) return "linear-gradient(90deg, #6be48d, #34c759)";
+  if(avg >= 45) return "linear-gradient(90deg, #ffd06e, #ffb74d)";
+  return "linear-gradient(90deg, #ffb0b0, #ff8f8f)";
+}
+
+function renderSummary(sorted){
+  const summaryGrid = document.getElementById("summaryGrid");
+  summaryGrid.innerHTML = "";
+
+  const last = sorted[sorted.length - 1];
+  const scores = last.scores;
+
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+
+  const strongestIndex = scores.indexOf(max);
+  const weakestIndex = scores.indexOf(min);
+
+  const strongMeta = getStatMeta(strongestIndex);
+  const weakMeta = getStatMeta(weakestIndex);
+
+  const avg = Math.round((scores[0] + scores[1] + scores[2]) / 3);
+
+  const items = [
+    {
+      label: "Point fort",
+      value: `${strongMeta.key} (${scores[strongestIndex]}%)`,
+      hint: `C’est actuellement le repère le plus avancé de l’équipe.`
+    },
+    {
+      label: "Point prioritaire",
+      value: `${weakMeta.key} (${scores[weakestIndex]}%)`,
+      hint: `C’est l’axe sur lequel le prochain gain sera le plus utile.`
+    },
+    {
+      label: "Préparation à l’évaluation",
+      value: `${getPreparationLevel(avg)}`,
+      hint: `Niveau global actuel : ${avg}% de réussite moyenne.`,
+      extra: getBadge(avg)
+    },
+    {
+      label: "Progression globale",
+      value: `${avg}%`,
+      hint: `
+        <div class="progressBarWrap">
+          <div class="progressBar" style="width:${avg}%; background:${getProgressColor(avg)};"></div>
+        </div>
+      `
+    }
+  ];
+
+  items.forEach((item, idx) => {
+    const div = document.createElement("div");
+    div.className = "summaryItem";
+    div.style.animation = `fadeUp .45s var(--ease) ${idx * 0.05}s both`;
+    div.innerHTML = `
+      <div class="summaryLabel">${item.label}</div>
+      <div class="summaryValue">${item.value}</div>
+      <div class="summaryHint">${item.hint}</div>
+      ${item.extra ? item.extra : ""}
+    `;
+    summaryGrid.appendChild(div);
+  });
+}
+
+function getPointRadii(groupLength){
+  if(groupLength <= 1) return [7];
+  if(groupLength === 2) return [10, 6];
+  return [11, 8, 5];
+}
+
+function drawSmoothLine(ctx, points){
+  if(points.length < 2) return;
+
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+
+  for(let i = 0; i < points.length - 1; i++){
+    const p0 = points[i === 0 ? i : i - 1];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+  }
+}
+
+function drawArea(ctx, points, color, height, paddingBottom){
+  if(points.length < 2) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, height - paddingBottom);
+  ctx.lineTo(points[0].x, points[0].y);
+
+  for(let i = 0; i < points.length - 1; i++){
+    const p0 = points[i === 0 ? i : i - 1];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+  }
+
+  ctx.lineTo(points[points.length - 1].x, height - paddingBottom);
+  ctx.closePath();
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, color + "22");
+  gradient.addColorStop(1, color + "00");
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawChart(sorted){
+  const canvas = document.getElementById("progressChart");
+  const ctx = canvas.getContext("2d");
+
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * dpr;
+  canvas.height = 360 * dpr;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+
+  const width = rect.width;
+  const height = 360;
+
+  ctx.clearRect(0, 0, width, height);
+
+  const padding = { top: 28, right: 30, bottom: 52, left: 52 };
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
+
+  const bg = ctx.createLinearGradient(0, 0, 0, height);
+  bg.addColorStop(0, "#fcfdff");
+  bg.addColorStop(1, "#f4f8fd");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
+
+  for(let i = 0; i <= 5; i++){
+    const y = padding.top + (chartH / 5) * i;
+
+    ctx.beginPath();
+    ctx.strokeStyle = i === 5 ? "rgba(15,23,42,0.10)" : "rgba(15,23,42,0.06)";
+    ctx.lineWidth = 1;
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(width - padding.right, y);
+    ctx.stroke();
+
+    const value = 100 - (20 * i);
+    ctx.fillStyle = "#7b8798";
+    ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(value + "%", 10, y + 4);
+  }
+
+  if(sorted.length === 0) return;
+
+  const labels = sorted.map(r => `L${r.lesson}-E${r.essai}`);
+  const xStep = sorted.length === 1 ? 0 : chartW / (sorted.length - 1);
+
+  labels.forEach((label, i) => {
+    const x = padding.left + i * xStep;
+    ctx.fillStyle = "#7b8798";
+    ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, x, height - 18);
+  });
+
+  const lines = [
+    { data: sorted.map(r => r.scores[0]), color: "#ff6485", label: "TZF", key: 0 },
+    { data: sorted.map(r => r.scores[1]), color: "#34c759", label: "Tir -8s", key: 1 },
+    { data: sorted.map(r => r.scores[2]), color: "#3b82f6", label: "TReuZF", key: 2 }
+  ];
+
+  const linePoints = lines.map(line => ({
+    ...line,
+    points: line.data.map((val, i) => ({
+      x: padding.left + i * xStep,
+      y: padding.top + chartH - (val / 100) * chartH,
+      val
+    }))
+  }));
+
+  linePoints.forEach(line => drawArea(ctx, line.points, line.color, height, padding.bottom));
+
+  linePoints.forEach((line) => {
+    drawSmoothLine(ctx, line.points);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = line.color;
+    ctx.shadowColor = line.color + "22";
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+
+  for(let i = 0; i < sorted.length; i++){
+    const points = linePoints.map(line => ({
+      color: line.color,
+      key: line.key,
+      val: line.points[i].val,
+      x: line.points[i].x,
+      y: line.points[i].y
+    }));
+
+    const groups = {};
+    points.forEach(p => {
+      const key = `${Math.round(p.x)}-${Math.round(p.y)}`;
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(p);
+    });
+
+    Object.values(groups).forEach(group => {
+      group.sort((a, b) => a.key - b.key);
+      const radii = getPointRadii(group.length);
+
+      group.forEach((p, index) => {
+        const radius = radii[index] || 7;
+
+        ctx.beginPath();
+        ctx.fillStyle = p.color + "18";
+        ctx.arc(p.x, p.y, radius + 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "white";
+        ctx.arc(p.x, p.y, radius + 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.arc(p.x - radius * 0.18, p.y - radius * 0.18, Math.max(2, radius * 0.34), 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+  }
+
+  const legendX = padding.left;
+  const legendY = 18;
+
+  linePoints.forEach((line, i) => {
+    const x = legendX + i * 155;
+
+    ctx.beginPath();
+    ctx.fillStyle = line.color + "18";
+    ctx.arc(x, legendY, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = line.color;
+    ctx.arc(x, legendY, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#111827";
+    ctx.font = "13px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(line.label, x + 14, legendY + 4);
+  });
+}
+
+function openTeam(team){
+  showPage("pageResults");
+
+  let data = getData();
+  let t = data[team];
+
+  document.getElementById("teamTitle").innerHTML = team;
+
+  let body = document.getElementById("tableBody");
+  body.innerHTML = "";
+
+  let sorted = [...t.results].sort((a, b) => a.lesson - b.lesson || a.essai - b.essai);
+
+  if(sorted.length === 0){
+    body.innerHTML = `
+      <tr>
+        <td colspan="4">
+          <div class="emptyState">Aucun résultat enregistré pour cette équipe.</div>
+        </td>
+      </tr>
+    `;
+    document.getElementById("summaryGrid").innerHTML = "";
+    drawChart([]);
+    return;
+  }
+
+  const lastIndex = sorted.length - 1;
+
+  sorted.forEach((r, index) => {
+    const min = Math.min(...r.scores);
+
+    let tr = document.createElement("tr");
+    tr.style.animation = `fadeUp .35s var(--ease) ${index * 0.03}s both`;
+    tr.innerHTML = `
+      <td>Leçon ${r.lesson} — Essai ${r.essai}</td>
+      <td class="colTZF ${r.scores[0] === min ? 'best' : ''}">${r.scores[0]}%</td>
+      <td class="col8 ${r.scores[1] === min ? 'best' : ''}">${r.scores[1]}%</td>
+      <td class="colTREU ${r.scores[2] === min ? 'best' : ''}">${r.scores[2]}%</td>
+    `;
+    body.appendChild(tr);
+
+    if(index === lastIndex){
+      const feedback = getMainFeedback(r.scores, index);
+      const otherStatsText = getOtherStatsFeedback(r.scores, feedback.weakestIndex);
+
+      let feedbackRow = document.createElement("tr");
+      feedbackRow.className = "feedbackRow";
+      feedbackRow.innerHTML = `
+        <td colspan="4">
+          <div class="feedbackText ${feedback.className}">
+            <div>${feedback.text}</div>
+            <div class="feedbackSub"><strong>Vue d’ensemble :</strong> ${otherStatsText}</div>
+          </div>
+        </td>
+      `;
+      body.appendChild(feedbackRow);
+    }
+  });
+
+  renderSummary(sorted);
+  setTimeout(() => drawChart(sorted), 80);
+}
+
+function deleteAll(){
+  if(confirm("Supprimer toutes les équipes et données ?")){
+    localStorage.removeItem("basket");
+    showTeams();
+  }
+}
+
+window.addEventListener("resize", () => {
+  const title = document.getElementById("teamTitle").innerText.trim();
+  const data = getData();
+  if(title && data[title]){
+    const sorted = [...data[title].results].sort((a, b) => a.lesson - b.lesson || a.essai - b.essai);
+    drawChart(sorted);
+  }
+});
+
+updateSquares();
+updatePercent();
+</script>
+</body>
+</html>
